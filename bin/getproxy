@@ -1,7 +1,31 @@
 #!/usr/bin/env bash
 
 network_service=$1
+secure=$2
 
-proxy_enabled=$(networksetup -getwebproxy "$network_service")
+function stat_param {
+  secure=$1
+  case $secure in
+    true)
+      echo '-getsecurewebproxy'
+      ;;
+    *)
+      echo '-getwebproxy'
+      ;;
+  esac
+}
 
-echo "$proxy_enabled"
+function stat_command {
+  param=$1
+  echo "networksetup $param $network_service"
+}
+
+function enabled {
+  echo "$1 | grep -qe '^Enabled: Yes'"
+}
+
+param=$(stat_param "$secure")
+sc=$(stat_command "$param")
+command=$(enabled "$sc")
+
+eval "$command"
