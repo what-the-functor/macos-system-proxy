@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+network_service=$1
+
+proxy_enabled=$(networksetup -getwebproxy "$network_service")
+
+echo "$proxy_enabled"
