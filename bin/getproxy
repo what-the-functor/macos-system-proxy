@@ -21,11 +21,32 @@ function stat_command {
 }
 
 function enabled {
-  echo "$1 | grep -qe '^Enabled: Yes'"
+  _status=$(eval "$1")
+  grep -e '^Enabled: Yes' <<< "$_status"
+}
+
+function server {
+  _status=$1
+  $_status | awk -F ': ' '/^Server/ {print $2}'
+}
+
+function port {
+  _status=$1
+  $_status | awk -F ': ' '/^Port/ {print $2}'
+}
+
+function url {
+  _server=$1
+  _port=$2
+  echo "$_server:$_port"
 }
 
 param=$(stat_param "$secure")
-sc=$(stat_command "$param")
-command=$(enabled "$sc")
 
-eval "$command"
+proxy_status=$(stat_command "$param")
+
+if [[ $(enabled "$proxy_status") ]]; then
+  _s=$(server "$proxy_status")
+  _p=$(port "$proxy_status")
+  url "$_s" "$_p"
+fi
