@@ -1,15 +1,26 @@
 #!/usr/bin/env bash
 
-network_service=$1
-secure=$2
+this=$(basename "$0")
+
+read -r -d '' usage << EOM
+$this
+Returns the proxy host for the given network service, and protocol, from macOS Network preferences.
+
+USAGE: $this [-h] -s SERVICE -p PROTOCOL
+
+WHERE:
+  -h show this help text
+  -s the network service
+  -p the protocol [http|https]
+EOM
 
 function stat_param {
-  secure=$1
-  case $secure in
-    true)
+  protocol=$1
+  case $protocol in
+    https)
       echo '-getsecurewebproxy'
       ;;
-    *)
+    http)
       echo '-getwebproxy'
       ;;
   esac
@@ -17,7 +28,8 @@ function stat_param {
 
 function stat_command {
   param=$1
-  echo "networksetup $param $network_service"
+  service=$2
+  echo "networksetup $param $service"
 }
 
 function enabled {
@@ -41,12 +53,59 @@ function url {
   echo "$_server:$_port"
 }
 
-param=$(stat_param "$secure")
-
-proxy_status=$(stat_command "$param")
-
-if [[ $(enabled "$proxy_status") ]]; then
+function proxy {
   _s=$(server "$proxy_status")
   _p=$(port "$proxy_status")
   url "$_s" "$_p"
+}
+
+function validateOpt {
+  var=$1
+  opt=$2
+  if [[ -z $var ]]; then
+    echo "missing required option: $opt"
+  fi
+}
+
+protocol=''
+param=''
+service=''
+
+while getopts ':hs:p:' opt; do
+  case "$opt" in
+    h) echo "$usage"
+       exit
+       ;;
+    s) service="$OPTARG"
+       ;;
+    p) protocol="$OPTARG"
+       ;;
+    :) printf "missing argument for -%s\\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;
+    \?) printf "illegal option: -%s\\n" "$OPTARG" >&2
+        echo "$usage" >&2
+        exit 1
+        ;;
+  esac
+done
+
+read -r -d '' errors << EOM
+$(validateOpt "$protocol" "-p")
+$(validateOpt "$service" "-s")
+EOM
+
+
+if [[ ! -z $errors ]]; then
+  printf "%s\\n\\n" "$errors"
+  echo "$usage"
+  exit 1
+fi
+
+param=$(stat_param "$protocol")
+proxy_status=$(stat_command "$param" "$service")
+
+if [[ $(enabled "$proxy_status") ]]; then
+  proxy >&2
 fi
