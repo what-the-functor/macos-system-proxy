@@ -1,0 +1,34 @@
+* macOS System Proxy
+
+Shell command, returns the proxy host for the given network service and protocol, from macOS Network preferences.
+
+*NOTE: This is a pre-release. The API is subject to change, slightly.*
+
+** Install using Homebrew
+
+First, add tap
+#+BEGIN_SRC shell
+  brew tap tonylotts/homebrew-macos-system-proxy
+#+END_SRC
+
+Install
+#+BEGIN_SRC shell
+  brew install macos-system-proxy
+#+END_SRC
+
+** Usage Examples
+*** Set proxy environment variables in your shell profile
+
+Fish
+#+BEGIN_SRC fish
+  set http_proxy (getproxy -s Wi-Fi -p http)
+  set https_proxy (getproxy -s Wi-Fi -p https)
+#+END_SRC
+
+Bash/ZSH
+#+BEGIN_SRC bash
+  source set-or-unset
+
+  set_or_unset "http_proxy" $(getproxy -s Wi-Fi -p http)
+  set_or_unset "https_proxy" $(getproxy -s Wi-Fi -p https)
+#+END_SRC
