@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Sets env var if value is non-empty, unsets env var if value is empty
+# Side-effects:
+#   sets or unsets env var
+# Arguments:
+#   name of the env var
+#   value of the env var
+# Returns:
+#   None
+function set_or_unset {
+  _env_var=$1
+  _value=$2
+  if [[ ! -z $_value ]]; then
+    export $"$_env_var=$_value"
+  else
+    unset "$_env_var"
+  fi
+}
