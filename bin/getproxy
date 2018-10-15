@@ -107,5 +107,5 @@ param=$(stat_param "$protocol")
 proxy_status=$(stat_command "$param" "$service")
 
 if [[ $(enabled "$proxy_status") ]]; then
-  proxy >&2
+  proxy
 fi
